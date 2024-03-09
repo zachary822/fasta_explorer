@@ -12,9 +12,11 @@ import {
   FormMessage,
 } from "./ui/form";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import Plot from "react-plotly.js";
 import { useState } from "react";
 import { Textarea } from "./ui/textarea";
+import dynamic from "next/dynamic";
+
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
 type FileResult = {
   sequences: {
