@@ -56,6 +56,7 @@ FROM base as final
 
 # Use production node environment by default.
 ENV NODE_ENV production
+ENV API_URL "http://api:8000"
 
 # Run the application as a non-root user.
 USER node

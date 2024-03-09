@@ -4,12 +4,16 @@ version = "0.1.0"
 description = ""
 authors = ["Zachary Juang <zachary822@me.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.110.0"
 uvicorn = {extras = ["standard"], version = "^0.27.1"}
 pydantic = "^2.6.3"
+python-multipart = "^0.0.9"
+bam-reader = {git = "https://github.com/zachary822/bam_reader.git"}
+biopython = "^1.83"
 
 
 [build-system]

@@ -33,7 +33,7 @@ RUN adduser \
 ENV PATH="/root/.local/bin:$PATH"
 
 RUN apt update && \
-    apt install -y curl && \
+    apt install -y curl build-essential && \
     curl -sSL https://install.python-poetry.org | python3 - && \
     poetry config virtualenvs.create false
 
