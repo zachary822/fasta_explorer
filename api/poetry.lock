@@ -44,7 +44,7 @@ develop = false
 type = "git"
 url = "https://github.com/zachary822/bam_reader.git"
 reference = "HEAD"
-resolved_reference = "70c71062c90a815d33d0388429a0679e356425b8"
+resolved_reference = "af5be8af95ac9b1eeaca769689ecbcee03404385"
 
 [[package]]
 name = "biopython"

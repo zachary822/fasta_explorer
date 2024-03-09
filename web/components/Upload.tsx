@@ -12,7 +12,9 @@ import {
   FormMessage,
 } from "./ui/form";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import Plot from "react-plotly.js";
 import { useState } from "react";
+import { Textarea } from "./ui/textarea";
 
 type FileResult = {
   sequences: {
@@ -35,13 +37,26 @@ export default function Upload() {
       body,
     })
       .then((resp) => {
-        if (resp.status === 400) {
-          form.setError("file", {
-            type: "Bad Request",
-            message: "Invalid File Type",
+        if (resp.status >= 400) {
+          resp.json().then((data) => {
+            if (data.detail) {
+              form.setError("file", {
+                type: "Bad Request",
+                message: data.detail,
+              });
+            } else if (
+              Array.isArray(data) &&
+              data.length > 0 &&
+              data[0].type &&
+              data[0].msg
+            ) {
+              form.setError("file", {
+                type: data[0].type,
+                message: data[0].msg,
+              });
+            }
           });
-
-          throw Error("Bad request");
+          return;
         }
 
         return resp.json();
@@ -52,30 +67,74 @@ export default function Upload() {
   };
 
   return (
-    <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(submit)}>
-          <FormField
-            control={form.control}
-            name="file"
-            rules={{ required: true }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>File</FormLabel>
-                <FormControl>
-                  <Input type="file" accept=".fasta,.bam" {...field} />
-                </FormControl>
-                <FormDescription>Upload a FASTA or BAM file.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+    <>
+      <div className="mb-4 w-full">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(submit)}
+            onReset={() => form.reset()}
+          >
+            <FormField
+              control={form.control}
+              name="file"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>File</FormLabel>
+                  <FormControl>
+                    <Input type="file" accept=".fasta,.bam" {...field} />
+                  </FormControl>
+                  <FormDescription>Upload a FASTA or BAM file.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fasta"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>FASTA</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Input a fast formatted sequence.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="mt-8">
+              <Button type="submit" className="mr-4">
+                Upload
+              </Button>
+              <Button type="reset" variant="destructive">
+                Clear
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+      {result && result.sequences.length > 1 && (
+        <div>
+          <Plot
+            data={[
+              {
+                x: result.sequences.map((seq) => seq.sequence.length),
+                type: "histogram",
+              },
+            ]}
+            layout={{
+              yaxis: { title: "count" },
+              xaxis: { title: "length (bp)" },
+            }}
           />
-          <Button type="submit" className="mt-8">
-            Upload
-          </Button>
-        </form>
-      </Form>
-      <div className="text-base max-w-prose">
+          <div className="text-base font-medium">
+            Reads: <span>{result.sequences.length}</span>
+          </div>
+        </div>
+      )}
+      <div className="text-base w-full">
         {result &&
           result.sequences.map((seq, i) => (
             <div className="my-4" key={i}>
@@ -101,6 +160,6 @@ export default function Upload() {
             </div>
           ))}
       </div>
-    </div>
+    </>
   );
 }
